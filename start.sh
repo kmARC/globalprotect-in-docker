@@ -15,13 +15,23 @@ VPN_NAMESERVERS=(
   10.130.0.22
 )
 
+trap 'cleanup' EXIT INT
+
+cleanup() {
+  for route in "${VPN_ROUTES[@]}"; do
+    sudo ip route delete "$route" || true
+  done
+  for nameserver in "${VPN_NAMESERVERS[@]}"; do
+    sudo sed -i "/^nameserver $nameserver$/d" /etc/resolv.conf
+  done
+}
+
 for route in "${VPN_ROUTES[@]}"; do
   sudo ip route add "$route" via 172.17.0.2 dev docker0 || true
 done
-
 for nameserver in "${VPN_NAMESERVERS[@]}"; do
-  if ! grep "nameserver $nameserver" /etc/resolv.conf; then
-    echo "nameserver $nameserver" | sudo tee -a /etc/resolv.conf
+  if ! grep "^nameserver $nameserver$" /etc/resolv.conf; then
+    sudo sed -i "1i nameserver $nameserver" /etc/resolv.conf
   fi
 done
 

@@ -20,6 +20,6 @@ COPY pkgs/*.zst .
 
 RUN pacman -Syu --noconfirm \
  && pacman -U --noconfirm /*.zst \
- && pacman -S --noconfirm  sudo vim  \
+ && pacman -S --noconfirm  sudo \
  && rm -f /*.zst \
  && rm -rf /var/cache/pacman/pkg
