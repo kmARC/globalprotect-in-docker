@@ -9,17 +9,18 @@ RUN useradd -m builder \
 
 USER builder
 
-RUN git clone https://aur.archlinux.org/globalprotect-openconnect-git.git \
-      && cd globalprotect-openconnect-git \
-      && makepkg -si --noconfirm
+RUN git clone https://aur.archlinux.org/globalprotect-openconnect-git.git /tmp/globalprotect-openconnect-git
+
+WORKDIR /tmp/globalprotect-openconnect-git
+
+RUN makepkg -si --noconfirm
 
 FROM archlinux
 
-# # COPY --from=builder /*.zst .
-COPY pkgs/*.zst .
+COPY --from=builder /tmp/globalprotect-openconnect-git/*.zst /tmp/
 
 RUN pacman -Syu --noconfirm \
- && pacman -U --noconfirm /*.zst \
- && pacman -S --noconfirm  sudo \
- && rm -f /*.zst \
+ && pacman -U --noconfirm /tmp/*.zst \
+ && pacman -S --noconfirm sudo dbus chromium inetutils bind \
+ && rm -rf /tmp/* \
  && rm -rf /var/cache/pacman/pkg
